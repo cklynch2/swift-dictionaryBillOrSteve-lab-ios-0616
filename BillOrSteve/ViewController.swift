@@ -30,16 +30,20 @@ class ViewController: UIViewController {
         if (currentPerson == "Steve Jobs") {
             score += 1
         }
-        scoreLabel.text = "\(score)"
+        scoreLabel.text = "\(score)/9"
+        removeFact()
         showFact()
+        gameOver()
     }
     
     @IBAction func billButtonTapped(sender: AnyObject) {
         if (currentPerson == "Bill Gates") {
             score += 1
         }
-        scoreLabel.text = "\(score)"
+        scoreLabel.text = "\(score)/9"
+        removeFact()
         showFact()
+        gameOver()
     }
     
     func showFact() {
@@ -53,30 +57,59 @@ class ViewController: UIViewController {
         factLabel.text = currentFact
     }
     
+    func removeFact() {
+        
+        if var facts = billAndSteveFacts[currentPerson] {
+            if facts.isEmpty {
+                billAndSteveFacts[currentPerson] = nil
+            
+            } else {
+            for (index, fact) in facts.enumerate() {
+                if fact == currentFact {
+                    facts.removeAtIndex(index)
+                    billAndSteveFacts[currentPerson] = facts
+                }
+            } }
+        }
+    }
+    
+    func gameOver() {
+        if billAndSteveFacts.isEmpty {
+            scoreLabel.text = "Game over!\nFinal score: \(score) out of 9"
+        }
+    }
+
     func randomNumberFromZeroTo(number: Int) -> Int {
         return Int(arc4random_uniform(UInt32(number)))
     }
     
-    func randomPerson() -> String {
+    func randomPerson() -> String? {
         let randomNumber = arc4random_uniform(2)
         
         if randomNumber == 0 {
-            return "Steve Jobs"
+            if billAndSteveFacts.keys.contains("Steve Jobs") {
+                return "Steve Jobs"
+            }
         } else {
-            return "Bill Gates"
+            if billAndSteveFacts.keys.contains("Bill Gates") {
+                return "Bill Gates"
+            }
         }
+        return nil
     }
     
     func getRandomFact() -> (person: String, fact: String) {
-        let person = randomPerson()
+        var personVar = ""
         var randomFact = ""
         
-        if let facts = billAndSteveFacts[person] {
-            let randomIndex = randomNumberFromZeroTo(facts.count - 1)
-            randomFact += facts[randomIndex]
+        if let person = randomPerson() {
+            personVar += person
+            if let facts = billAndSteveFacts[person] {
+                let randomIndex = randomNumberFromZeroTo(facts.count - 1)
+                randomFact += facts[randomIndex]
+            }
         }
-        
-        return (person: person, fact: randomFact)
+        return (person: personVar, fact: randomFact)
     }
     
     func createFacts() {
